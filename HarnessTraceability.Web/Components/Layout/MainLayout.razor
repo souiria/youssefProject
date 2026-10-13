@@ -25,9 +25,9 @@
 </MudLayout>
 @code {
     private bool open = true;
-    protected override void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
-        if (!Session.IsAuthenticated)
+        if (firstRender && !Session.IsAuthenticated)
             Nav.NavigateTo("/login", replace: true);
     }
     private void Toggle() => open = !open;
