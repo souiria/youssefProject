@@ -14,3 +14,7 @@ dotnet run --project HarnessTraceability.Web
 ```
 
 The original WinForms project remains unchanged and is still the legacy desktop application. The new web project is added to the solution and uses the existing SQL views/relationships and authentication endpoint rather than mock data.
+
+## SQL Server connectivity
+
+The SQL databases are on internal SEWS-E hosts (`MOKEMLS001`, `MOASMLS001`, etc.). The Blazor server—not the browser—must run on a machine that can resolve those names and reach TCP port 1433 through the corporate network or VPN. Configure the real `wtrviewuser` password outside source control using user secrets, environment variables, or deployment settings. The default `CHANGE_ME` value is intentionally not usable. The app now forces TCP and reports a clear corporate-network/firewall message when a host cannot be reached.
