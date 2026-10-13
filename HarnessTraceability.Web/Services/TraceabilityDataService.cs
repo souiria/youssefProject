@@ -9,20 +9,35 @@ public sealed class TraceabilityDataService
 {
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _clients;
+    // Keep both the legacy authentication site codes and the friendly names used by older forms.
     private static readonly IReadOnlyDictionary<string,string> Servers = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase)
     {
-        ["K1"]="MOKEMLS001", ["K2"]="MOASMLS001", ["MFZ"]="MOFZMLS001", ["AA"]="MOAAMLS001", ["Skirat"]="MOSKMLS001",
-        ["PortSaid"]="EGPSMLS001", ["TenthRamadan"]="EGTRMLS001", ["SixthOctober"]="EGSOMLS001", ["Alba"]="ROAIMLS001", ["Deva"]="RODVMLS001", ["Monastir"]="TNMOMLS001"
+        ["K1"]="MOKEMLS001", ["MOKE"]="MOKEMLS001", ["K2"]="MOASMLS001", ["MOAS"]="MOASMLS001",
+        ["MFZ"]="MOFZMLS001", ["MOFZ"]="MOFZMLS001", ["AA"]="MOAAMLS001", ["MOAA"]="MOAAMLS001",
+        ["Skirat"]="MOSKMLS001", ["SKHIRAT"]="MOSKMLS001", ["MOSK"]="MOSKMLS001",
+        ["PortSaid"]="EGPSMLS001", ["Port Said"]="EGPSMLS001", ["EGPS"]="EGPSMLS001",
+        ["TenthRamadan"]="EGTRMLS001", ["10 Ramadan"]="EGTRMLS001", ["EGTR"]="EGTRMLS001",
+        ["SixthOctober"]="EGSOMLS001", ["6 October"]="EGSOMLS001", ["EGSO"]="EGSOMLS001",
+        ["Alba"]="ROAIMLS001", ["ROAI"]="ROAIMLS001", ["Deva"]="RODVMLS001", ["RODV"]="RODVMLS001",
+        ["Monastir"]="TNMOMLS001", ["TNMO"]="TNMOMLS001"
     };
     public TraceabilityDataService(IConfiguration configuration, IHttpClientFactory clients) { _configuration=configuration; _clients=clients; }
     public IReadOnlyList<string> SiteNames => Servers.Keys.ToList();
-    public string? ServerFor(string site) => Servers.TryGetValue(site, out var server) ? server : null;
+    public string? ServerFor(string site)
+    {
+        if (string.IsNullOrWhiteSpace(site)) return null;
+        var key = site.Trim();
+        if (Servers.TryGetValue(key, out var server)) return server;
+        var compact = key.Replace(" ", "", StringComparison.Ordinal).Replace("-", "", StringComparison.Ordinal);
+        return Servers.TryGetValue(compact, out server) ? server : null;
+    }
     private string Connection(string site)
     {
         var server = ServerFor(site) ?? throw new InvalidOperationException($"Unknown site '{site}'.");
         var template = _configuration.GetConnectionString("Wtr");
         if (string.IsNullOrWhiteSpace(template)) throw new InvalidOperationException("ConnectionStrings:Wtr is not configured.");
-        var connection = new SqlConnectionStringBuilder(template.Replace("{server}", server));
+        // The selected site is resolved for every operation; changing site cannot reuse the previous server.
+        var connection = new SqlConnectionStringBuilder(template.Replace("{server}", server, StringComparison.OrdinalIgnoreCase));
         // The legacy desktop app used named-pipe fallback. The web app must use TCP explicitly.
         if (!connection.DataSource.Contains(',')) connection.DataSource = $"tcp:{connection.DataSource},{_configuration["SqlServer:Port"] ?? "1433"}";
         connection.ConnectTimeout = int.TryParse(_configuration["SqlServer:ConnectTimeoutSeconds"], out var timeout) ? timeout : 15;
@@ -42,7 +57,7 @@ public sealed class TraceabilityDataService
         catch (SqlException ex) when (ex.Number == 53 || ex.Number == 40 || ex.InnerException is SocketException)
         {
             var server = ServerFor(site) ?? site;
-            throw new InvalidOperationException($"Cannot reach SQL Server '{server}'. The web server must be connected to the SEWS-E corporate network/VPN, and TCP port 1433 must be allowed. Verify the site server name and firewall rules. Original error: {ex.Message}", ex);
+            throw new InvalidOperationException($"Cannot resolve or reach SQL Server '{server}' for selected site '{site}'. Run the Blazor server on the SEWS-E corporate network/VPN, verify corporate DNS, and allow TCP port 1433. Original error: {ex.Message}", ex);
         }
     }
     public async Task<AuthResult> AuthenticateAsync(string username, CancellationToken token=default)
