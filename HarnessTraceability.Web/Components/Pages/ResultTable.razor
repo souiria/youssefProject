@@ -1,0 +1,2 @@
+@if(Table is not null){<MudTable Items="@Rows" Dense="true" Hover="true" Striped="true" FixedHeader="true" Height="420px"><HeaderContent>@foreach(var c in Columns){<MudTh>@c</MudTh>}</HeaderContent><RowTemplate Context="row">@foreach(var c in Columns){<MudTd DataLabel="@c">@(row[c]?.ToString())</MudTd>}</RowTemplate></MudTable>}
+@code { [Parameter] public DataTable? Table{get;set;} IEnumerable<DataRow> Rows=>Table?.AsEnumerable()??Enumerable.Empty<DataRow>(); IEnumerable<string> Columns=>Table?.Columns.Cast<DataColumn>().Select(c=>c.ColumnName)??Enumerable.Empty<string>(); }

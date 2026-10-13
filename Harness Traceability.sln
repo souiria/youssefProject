@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Harness Traceability", "Harness Traceability.csproj", "{F01F5082-4FEE-49F6-83BA-2F71E6A16803}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HarnessTraceability.Web", "HarnessTraceability.Web\HarnessTraceability.Web.csproj", "{E92D73E8-1872-466A-BA7E-5B126D6A488F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F01F5082-4FEE-49F6-83BA-2F71E6A16803}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F01F5082-4FEE-49F6-83BA-2F71E6A16803}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F01F5082-4FEE-49F6-83BA-2F71E6A16803}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E92D73E8-1872-466A-BA7E-5B126D6A488F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E92D73E8-1872-466A-BA7E-5B126D6A488F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E92D73E8-1872-466A-BA7E-5B126D6A488F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E92D73E8-1872-466A-BA7E-5B126D6A488F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
